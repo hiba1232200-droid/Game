@@ -53,7 +53,7 @@ function db() {
 
 // رقم نسخة هيكل قاعدة البيانات — كل ما تضيف عمود/جدول جديد بالكود، زِد هذا الرقم
 // حتى يُعاد فحص الهيكل تلقائياً مرة واحدة بعد كل نشر جديد فقط
-define('SCHEMA_VERSION', '4');
+define('SCHEMA_VERSION', '5');
 
 function init_db($pdo) {
     // فحص سريع (استعلام واحد فقط): إذا الداتابيز متهيأة بالفعل بنفس النسخة،
@@ -239,6 +239,18 @@ function init_db($pdo) {
             WHERE COALESCE(first_topup_done,0)=0
             AND id IN (SELECT DISTINCT user_id FROM topups)");
     } catch (Exception $e) {}
+    // ===== جدول مشترك لأرقام العمليات بين الموقع والبوت =====
+    // البوت يتصل بنفس هذا الجدول (عبر SITE_DATABASE_URL) فلا يمكن استخدام
+    // نفس رقم العملية في الموقع والبوت معاً.
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS shared_tx_codes (
+            tx_code TEXT PRIMARY KEY,
+            source  TEXT,
+            ref     TEXT,
+            amount  " . (is_pg() ? "DOUBLE PRECISION" : "REAL") . " DEFAULT 0,
+            used_at " . (is_pg() ? "TIMESTAMP DEFAULT NOW()" : "TEXT DEFAULT CURRENT_TIMESTAMP") . "
+        )");
+    } catch (Exception $e) {}
     // تسجيل نجاح التهيئة بهذي النسخة — أي طلب جاي بعد هلق رح يتجاوز كل الشغل فوق فوراً
     try {
         $ins2 = is_pg()
@@ -324,6 +336,43 @@ function setting($key, $default = null) {
     $v = $st->fetchColumn();
     return $v !== false ? $v : $default;
 }
+/**
+ * يحجز رقم العملية في الجدول المشترك مع البوت.
+ * يرجع: true = تم الحجز (رقم جديد) | false = مستخدم مسبقاً | null = تعذّر الفحص
+ */
+function shared_tx_claim($txCode, $source = 'site', $ref = '', $amount = 0) {
+    $code = trim((string)$txCode);
+    if ($code === '') return false;
+    try {
+        if (is_pg()) {
+            $st = db()->prepare(
+                "INSERT INTO shared_tx_codes (tx_code, source, ref, amount)
+                 VALUES (?, ?, ?, ?) ON CONFLICT (tx_code) DO NOTHING"
+            );
+            $st->execute([$code, $source, (string)$ref, (float)$amount]);
+            return $st->rowCount() > 0;
+        }
+        $st = db()->prepare(
+            "INSERT OR IGNORE INTO shared_tx_codes (tx_code, source, ref, amount)
+             VALUES (?, ?, ?, ?)"
+        );
+        $st->execute([$code, $source, (string)$ref, (float)$amount]);
+        return $st->rowCount() > 0;
+    } catch (Exception $e) {
+        return null; // عطل مؤقت — لا نرفض إيداعاً صحيحاً بسببه
+    }
+}
+
+/** يحرّر رقم عملية محجوز (عند فشل إضافة الرصيد بعد الحجز) */
+function shared_tx_release($txCode) {
+    $code = trim((string)$txCode);
+    if ($code === '') return false;
+    try {
+        db()->prepare("DELETE FROM shared_tx_codes WHERE tx_code=?")->execute([$code]);
+        return true;
+    } catch (Exception $e) { return false; }
+}
+
 function set_setting($key, $value) {
     $sql = "INSERT INTO settings (key,value) VALUES (?,?)
             ON CONFLICT(key) DO UPDATE SET value=excluded.value";

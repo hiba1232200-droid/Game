@@ -166,6 +166,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($st2->fetchColumn()) $dup = true;
             } catch (Exception $e) {}
 
+            // 🔗 فحص/حجز مشترك مع البوت
+            if (!$dup) {
+                if (shared_tx_claim($txId, 'site:usdt', (string)$U['id'], $usdtAmount) === false) {
+                    $dup = true;
+                }
+            }
+
             if ($dup) {
                 $msg = 'رقم العملية هذا مستخدم مسبقاً';
             } else {
@@ -196,6 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = 'رقم العملية هذا مستخدم مسبقاً';
         } else {
             $vErr = null;
+            $claimed = null;
             $amount = verify_tx($txId, $method, $vErr);
             if ($amount === null) {
                 $dest = $method === 'shamcash' ? shamcash_number() : SYRIATEL_NUMBER;
@@ -208,6 +216,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $msg = 'لم يتم العثور على التحويل — تأكد من رقم العملية وأن التحويل وصل إلى ' . $dest;
                 }
             } else {
+                // 🔗 حجز الرقم في الجدول المشترك مع البوت قبل إضافة الرصيد
+                $claimed = shared_tx_claim($txId, 'site:' . $method, (string)$U['id'], $amount);
+            }
+            if ($amount !== null && $claimed === false) {
+                $msg = 'رقم العملية هذا مستخدم مسبقاً';
+            } elseif ($amount !== null) {
                 // ------ 🟢 تعديل الحسبة بدقة هنا 🟢 ------
                 if ($method === 'shamcash' && $currency === 'usd') {
                     // إذا كان الشحن بالدولار، نضربه مباشرة بسعر صرف شام كاش الخاص (بدون إضافة أصفار)
