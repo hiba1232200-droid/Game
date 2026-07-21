@@ -4,6 +4,17 @@
    لإلغائها: احذف سطر <link> الخاص بها من header.php فقط.
    ============================================================ */
 
+/* ============================================================
+   0) جعل خلفية body تسمح بظهور الأورورا خلفها
+   (خلفية style.css الأصلية معتّمة وتغطّي الطبقة، فنخفّف اعتمادها)
+   ============================================================ */
+html {
+  background-color: #0b0e1a;
+}
+body {
+  background: transparent !important;
+}
+
 :root {
   /* ألوان نيون إضافية (لا تلغي متغيراتك الأصلية) */
   --neon-cyan: #22e0ff;
@@ -23,10 +34,10 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(closest-side at 15% 20%, rgba(124, 92, 255, 0.18), transparent 70%),
-    radial-gradient(closest-side at 85% 15%, rgba(34, 224, 255, 0.14), transparent 70%),
-    radial-gradient(closest-side at 70% 85%, rgba(59, 130, 255, 0.14), transparent 70%),
-    radial-gradient(closest-side at 25% 90%, rgba(255, 185, 56, 0.10), transparent 70%);
+    radial-gradient(closest-side at 15% 20%, rgba(124, 92, 255, 0.35), transparent 70%),
+    radial-gradient(closest-side at 85% 15%, rgba(34, 224, 255, 0.28), transparent 70%),
+    radial-gradient(closest-side at 70% 85%, rgba(59, 130, 255, 0.28), transparent 70%),
+    radial-gradient(closest-side at 25% 90%, rgba(255, 185, 56, 0.20), transparent 70%);
   background-repeat: no-repeat;
   animation: auroraDrift 18s ease-in-out infinite alternate;
   pointer-events: none;
