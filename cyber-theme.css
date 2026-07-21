@@ -1,0 +1,64 @@
+/* ============================================================
+   LUXE CARD — طبقة تصميم سايبربانك خفيفة (Phase 1)
+   كلها CSS نقي: صفر مكتبات، صفر Three.js، خفيفة على الموبايل.
+   لإلغائها: احذف سطر <link> الخاص بها من header.php فقط.
+   ============================================================ */
+
+:root {
+  /* ألوان نيون إضافية (لا تلغي متغيراتك الأصلية) */
+  --neon-cyan: #22e0ff;
+  --neon-blue: #3b82ff;
+  --neon-purple: #7c5cff;
+  --neon-gold: #ffb938;
+  --glow-soft: 0 0 18px;
+}
+
+/* ============================================================
+   1) خلفية أورورا متحركة — طبقة ثابتة خلف كل شيء
+   تعتمد على تحريك gradients فقط (GPU-friendly، خفيفة جداً)
+   ============================================================ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(closest-side at 15% 20%, rgba(124, 92, 255, 0.18), transparent 70%),
+    radial-gradient(closest-side at 85% 15%, rgba(34, 224, 255, 0.14), transparent 70%),
+    radial-gradient(closest-side at 70% 85%, rgba(59, 130, 255, 0.14), transparent 70%),
+    radial-gradient(closest-side at 25% 90%, rgba(255, 185, 56, 0.10), transparent 70%);
+  background-repeat: no-repeat;
+  animation: auroraDrift 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* شبكة رقمية خفيفة جداً فوق الأورورا */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(124, 92, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 224, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  pointer-events: none;
+}
+
+@keyframes auroraDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.9; }
+  50%  { transform: translate3d(0, -2%, 0) scale(1.05); opacity: 1; }
+  100% { transform: translate3d(0, 1%, 0) scale(1.02); opacity: 0.85; }
+}
+
+/* احترام تفضيل تقليل الحركة (أداء + وصولية) */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+
+/* على الشاشات الصغيرة نخفّف أكثر للحفاظ على الأداء */
+@media (max-width: 640px) {
+  body::after { background-size: 34px 34px; }
+}
