@@ -28,6 +28,29 @@ body {
    1) خلفية أورورا متحركة — طبقة ثابتة خلف كل شيء
    تعتمد على تحريك gradients فقط (GPU-friendly، خفيفة جداً)
    ============================================================ */
+/* ============================================================
+   1) خلفية أورورا متحركة — عنصر فعلي ثابت خلف المحتوى
+   (عنصر div مضمون الظهور، لا يتأثر بخلفيات العناصر الأخرى)
+   ============================================================ */
+.cyber-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 40% at 12% 18%, rgba(124, 92, 255, 0.55), transparent 70%),
+    radial-gradient(38% 38% at 88% 12%, rgba(34, 224, 255, 0.42), transparent 70%),
+    radial-gradient(42% 42% at 78% 82%, rgba(59, 130, 255, 0.42), transparent 70%),
+    radial-gradient(38% 38% at 20% 92%, rgba(255, 60, 172, 0.35), transparent 70%);
+  background-repeat: no-repeat;
+  animation: auroraDrift 16s ease-in-out infinite alternate;
+}
+/* المحتوى كله يبقى فوق الأورورا */
+body > *:not(.cyber-aurora) {
+  position: relative;
+  z-index: 1;
+}
+
 body::before {
   content: "";
   position: fixed;
