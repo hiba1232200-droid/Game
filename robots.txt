@@ -1,0 +1,31 @@
+# ===== LUXE CARD — إرشادات محركات البحث =====
+# ملاحظة: إذا غيّرت رابط الموقع (دومين مخصّص مثلاً)،
+# عدّل سطر Sitemap في آخر هذا الملف ليطابق الرابط الجديد.
+
+User-agent: *
+Allow: /
+
+# صفحات خاصة بالمستخدم — لا فائدة من فهرستها
+Disallow: /admin.php
+Disallow: /account.php
+Disallow: /wallet.php
+Disallow: /orders.php
+Disallow: /cart.php
+Disallow: /coupon.php
+Disallow: /notifications.php
+Disallow: /auth.php
+Disallow: /google_login.php
+Disallow: /support_chat.php
+Disallow: /buy.php
+Disallow: /otp.php
+Disallow: /verify_id.php
+Disallow: /check_name.php
+Disallow: /search_suggest.php
+Disallow: /notif_count.php
+Disallow: /telegram_webhook.php
+Disallow: /usdt_debug.php
+Disallow: /*?page=cart
+Disallow: /*?page=favs
+Disallow: /*?page=wheel
+
+Sitemap: https://game-production-4d49.up.railway.app/sitemap.php
