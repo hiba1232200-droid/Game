@@ -355,3 +355,41 @@ html { scroll-behavior: smooth; }
 }
 #cyCursor.on { opacity: 1; }
 #cyCursor.tap { transform: scale(1.9); }
+
+/* ============================================================
+   11) تحسينات أداء
+   ============================================================ */
+
+/* المتصفح يتخطّى رسم الشبكات خارج الشاشة تماماً.
+   contain-intrinsic-size يحجز ارتفاعاً تقديرياً فلا يقفز شريط التمرير. */
+.products-grid,
+.grid {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* عزل طبقة الأورورا: أي تغيير فيها لا يجبر المتصفح على إعادة
+   حساب باقي الصفحة (يقلّل عمل المعالج أثناء الحركة). */
+.cyber-aurora {
+  contain: strict;
+}
+
+/* الصور: مساحة محجوزة مسبقاً تمنع "قفزة التخطيط" أثناء التحميل
+   (يحسّن Core Web Vitals — مقياس CLS تحديداً) */
+.product-card img,
+.cat-img {
+  aspect-ratio: 1;
+  background: color-mix(in srgb, var(--card) 60%, transparent);
+}
+
+/* على الأجهزة الضعيفة: نلغي أثقل التأثيرات نهائياً */
+@media (max-width: 480px) {
+  .cat-card::before,
+  .product-card::before,
+  .btn::after {
+    display: none; /* اللمعة المتحركة */
+  }
+  .cyber-aurora {
+    animation-duration: 26s; /* حركة أبطأ = رسم أقل */
+  }
+}
