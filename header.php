@@ -48,13 +48,17 @@ if (maintenance_on() && !$__isAdmin && !$__hasBypass && !$__isAuthPage) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=20">
-<link rel="stylesheet" href="/cyber-theme.css?v=6">
+<link rel="stylesheet" href="/cyber-theme.css?v=7">
 <!-- الخط يحمّل بدون حجب الصفحة (أسرع ظهور) -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>
 <style>:root{--accent:<?= e(theme_accent()) ?>;--accent2:<?= e(theme_accent2()) ?>}</style>
 </head>
 <body>
+<div id="cyberLoader" aria-hidden="true">
+  <div class="cy-ring"></div>
+  <div class="cy-load-name">LUXE CARD</div>
+</div>
 <div class="cyber-aurora" aria-hidden="true"></div>
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
