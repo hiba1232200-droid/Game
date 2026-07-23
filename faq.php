@@ -15,6 +15,22 @@ $faqs = [
 
 include __DIR__ . '/header.php'; ?>
 
+<?php
+// Schema.org — يجعل جوجل يعرض هذه الأسئلة مباشرة في نتائج البحث
+$__faqLd = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => []];
+foreach ($faqs as $f) {
+    $__q = trim(preg_replace('/^[^\p{Arabic}a-zA-Z]+/u', '', $f[0])); // إزالة الإيموجي من بداية السؤال
+    $__faqLd['mainEntity'][] = [
+        '@type' => 'Question',
+        'name'  => $__q !== '' ? $__q : $f[0],
+        'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+    ];
+}
+?>
+<script type="application/ld+json">
+<?= json_encode($__faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+</script>
+
 <div class="faq-page">
   <h1 class="section-title">❓ الأسئلة الشائعة</h1>
   <p class="muted" style="margin-bottom:18px">إجابات على أكثر الأسئلة شيوعاً. إذا لم تجد إجابتك، تواصل معنا.</p>

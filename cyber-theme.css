@@ -433,3 +433,75 @@ html { scroll-behavior: smooth; }
   word-break: break-all;
 }
 .cy-toast.on { opacity: 1; transform: none; }
+
+/* ============================================================
+   13) الأسئلة الشائعة — طيّات زجاجية بتوهّج نيون
+   ============================================================ */
+.faq-item {
+  position: relative;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+.faq-item:hover {
+  border-color: color-mix(in srgb, var(--neon-purple) 45%, var(--border));
+  box-shadow: 0 6px 22px rgba(124, 92, 255, .18);
+}
+.faq-item.open {
+  border-color: color-mix(in srgb, var(--neon-cyan) 50%, var(--border));
+  box-shadow: 0 8px 28px rgba(34, 224, 255, .16);
+}
+/* شريط نيون جانبي يظهر عند الفتح */
+.faq-item::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform .3s ease;
+}
+.faq-item.open::before { transform: scaleY(1); }
+
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+.faq-arrow {
+  flex: none;
+  color: var(--neon-cyan);
+  font-size: 1.1rem;
+  transition: transform .3s ease;
+}
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+/* الفتح والإغلاق بحركة ناعمة */
+.faq-a {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 16px;
+  color: var(--muted);
+  line-height: 1.9;
+  transition: max-height .35s ease, opacity .3s ease, padding .3s ease;
+}
+.faq-item.open .faq-a {
+  max-height: 420px;
+  opacity: 1;
+  padding: 0 16px 15px;
+}
+
+@media (max-width: 820px) {
+  .faq-item { background: color-mix(in srgb, var(--card) 90%, transparent); }
+}
