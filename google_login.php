@@ -5,7 +5,22 @@ if (!google_enabled()) {
     header('Location: /auth.php'); exit;
 }
 
-$redirectUri = site_url() . '/google_login.php';
+// rtrim يمنع أشهر سبب للخطأ: وجود "/" زائدة في SITE_URL
+// تجعل الرابط "…app//google_login.php" فلا يطابق المسجَّل عند جوجل.
+$redirectUri = rtrim(site_url(), '/') . '/google_login.php';
+
+// أداة تشخيص: تعرض الرابط الذي يرسله موقعك فعلاً لجوجل.
+// افتح: /google_login.php?show_uri=1
+// (الرابط ليس سرياً — يظهر أصلاً داخل رابط تسجيل الدخول)
+if (isset($_GET['show_uri'])) {
+    header('Content-Type: text/plain; charset=UTF-8');
+    echo "الرابط الذي يرسله موقعك (redirect_uri):\n";
+    echo $redirectUri . "\n\n";
+    echo "ضع هذا الرابط حرفياً في Google Cloud Console:\n";
+    echo "APIs & Services → Credentials → Web client 1 → Authorized redirect URIs\n\n";
+    echo "SITE_URL الحالية: " . site_url() . "\n";
+    exit;
+}
 
 // الخطوة 2: رجوع جوجل مع code
 if (isset($_GET['code'])) {
@@ -54,11 +69,13 @@ if (isset($_GET['code'])) {
         $randPass = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
         db()->prepare("INSERT INTO users (name,email,password) VALUES (?,?,?)")
             ->execute([$name, $email, $randPass]);
+        @session_regenerate_id(true); // منع تثبيت الجلسة
         $_SESSION['uid'] = last_id('users');
         process_referral_signup($_SESSION['uid']); // ربط الإحالة + هدية المُحال
         notify_user($_SESSION['uid'], '🎉 أهلاً بك في ' . STORE_NAME . '!',
             'سعداء بانضمامك. اشحن محفظتك وابدأ بشراء شحن الألعاب والبطاقات بأسرع وأأمن طريقة. الدعم والمساعد الذكي جاهزين لخدمتك 24/7.', '🎉');
     } else {
+        @session_regenerate_id(true); // منع تثبيت الجلسة
         $_SESSION['uid'] = $u['id'];
     }
     $u = current_user();
