@@ -28,4 +28,4 @@ Disallow: /*?page=cart
 Disallow: /*?page=favs
 Disallow: /*?page=wheel
 
-Sitemap: https://game-production-4d49.up.railway.app/sitemap.php
+Sitemap: https://luxecard.up.railway.app/sitemap.php
