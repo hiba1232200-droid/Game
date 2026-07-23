@@ -426,6 +426,65 @@ function require_admin() {
     if (!$u || $u['role'] !== 'admin') { header('Location: /auth.php'); exit; }
     return $u;
 }
+/* ============================================================
+   حماية من تخمين كلمة المرور — قفل مربوط بعنوان IP
+   السبب: القفل المخزَّن في الجلسة يمكن تجاوزه بمسح الكوكيز،
+   أما هذا فمخزَّن في قاعدة البيانات فلا يمكن تجاوزه.
+   مبدأ السلامة: أي خطأ في القاعدة = السماح بالدخول (fail-open)،
+   حتى لا يُمنع مستخدم صادق بسبب عطل تقني.
+   ============================================================ */
+
+/** يرجع عنوان IP الحقيقي للزائر (مع مراعاة بروكسي Railway) */
+function client_ip() {
+    $fwd = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+    if ($fwd !== '') {
+        $parts = explode(',', $fwd);
+        $ip = trim($parts[0]);
+        if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
+    }
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
+}
+
+function _throttle_key() {
+    return 'lgt_' . substr(hash('sha256', client_ip()), 0, 24);
+}
+
+/** يرجع عدد الثواني المتبقية للقفل، أو 0 إذا مسموح بالمحاولة */
+function login_throttle_wait() {
+    try {
+        $raw = setting(_throttle_key(), '');
+        if (!$raw) return 0;
+        $p = explode('|', (string)$raw);
+        $until = (int)($p[1] ?? 0);
+        return $until > time() ? ($until - time()) : 0;
+    } catch (Exception $e) { return 0; }
+}
+
+/** يسجّل محاولة فاشلة. يرجع عدد المحاولات المتبقية قبل القفل */
+function login_throttle_fail($max = 6, $lockSeconds = 900) {
+    try {
+        $key = _throttle_key();
+        $raw = setting($key, '');
+        $fails = 0;
+        if ($raw) {
+            $p = explode('|', (string)$raw);
+            $fails = (int)($p[0] ?? 0);
+            // إذا انتهت مدة القفل السابق نبدأ العدّ من جديد
+            if ((int)($p[1] ?? 0) < time() && $fails >= $max) $fails = 0;
+        }
+        $fails++;
+        $until = ($fails >= $max) ? (time() + $lockSeconds) : (time() + 1800);
+        set_setting($key, $fails . '|' . $until);
+        return max(0, $max - $fails);
+    } catch (Exception $e) { return 99; }
+}
+
+/** يصفّر العدّاد بعد نجاح الدخول */
+function login_throttle_reset() {
+    try { set_setting(_throttle_key(), '0|0'); } catch (Exception $e) {}
+}
+
 function e($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 /** يُستدعى مرة واحدة بعد تسجيل مستخدم جديد.

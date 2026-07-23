@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 db()->prepare("INSERT INTO users (name,email,password) VALUES (?,?,?)")
                     ->execute([$name, $email, password_hash($pass, PASSWORD_DEFAULT)]);
+                @session_regenerate_id(true); // منع تثبيت الجلسة
                 $_SESSION['uid'] = last_id('users');
                 process_referral_signup($_SESSION['uid']); // ربط الإحالة + هدية المُحال
                 notify_user($_SESSION['uid'], '🎉 أهلاً بك في ' . STORE_NAME . '!',
@@ -29,7 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!isset($_SESSION['login_fails'])) $_SESSION['login_fails'] = 0;
         if (!isset($_SESSION['login_lock'])) $_SESSION['login_lock'] = 0;
 
-        if ($_SESSION['login_lock'] > time()) {
+        // قفل مربوط بعنوان IP ومخزَّن في القاعدة — لا يمكن تجاوزه بمسح الكوكيز
+        $ipWait = function_exists('login_throttle_wait') ? login_throttle_wait() : 0;
+
+        if ($ipWait > 0) {
+            $wait = ceil($ipWait / 60);
+            $err = "محاولات كثيرة فاشلة من هذا الجهاز. حاول بعد $wait دقيقة 🔒";
+        } elseif ($_SESSION['login_lock'] > time()) {
             $wait = ceil(($_SESSION['login_lock'] - time()) / 60);
             $err = "محاولات كثيرة فاشلة. حاول بعد $wait دقيقة 🔒";
         } else {
@@ -40,15 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // نجح — صفّر العدّاد
                 $_SESSION['login_fails'] = 0;
                 $_SESSION['login_lock'] = 0;
+                if (function_exists('login_throttle_reset')) login_throttle_reset();
                 if (!empty($u['banned'])) {
                     $err = 'هذا الحساب محظور. تواصل مع الدعم.';
                 } else {
+                    @session_regenerate_id(true); // منع تثبيت الجلسة
                     $_SESSION['uid'] = $u['id'];
                     header('Location: ' . ($u['role'] === 'admin' ? '/admin.php' : '/index.php')); exit;
                 }
             } else {
-                // فشل — زيد العدّاد
+                // فشل — زيد العدّاد (بالجلسة + بالـ IP)
                 $_SESSION['login_fails']++;
+                if (function_exists('login_throttle_fail')) login_throttle_fail();
                 $left = 5 - $_SESSION['login_fails'];
                 if ($_SESSION['login_fails'] >= 5) {
                     $_SESSION['login_lock'] = time() + 900; // قفل 15 دقيقة
