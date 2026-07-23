@@ -505,3 +505,133 @@ html { scroll-behavior: smooth; }
 @media (max-width: 820px) {
   .faq-item { background: color-mix(in srgb, var(--card) 90%, transparent); }
 }
+
+/* ============================================================
+   14) طبقات خلفية إضافية — خطوط رقمية + موجات طاقة
+   (طبقة واحدة إضافية فقط، بـ transform — رخيصة جداً)
+   ============================================================ */
+.cyber-aurora::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(115deg,
+      transparent 0 58px,
+      color-mix(in srgb, var(--neon-cyan) 7%, transparent) 58px 59px,
+      transparent 59px 118px),
+    radial-gradient(60% 30% at 50% 110%,
+      color-mix(in srgb, var(--neon-purple) 22%, transparent), transparent 70%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 85%);
+  animation: energyWave 22s linear infinite;
+}
+@keyframes energyWave {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-118px, -60px, 0); }
+}
+
+/* ============================================================
+   15) العناوين — تدرّج لوني متحرك
+   ============================================================ */
+.section-title {
+  background: linear-gradient(100deg,
+    var(--text) 0%,
+    var(--text) 35%,
+    color-mix(in srgb, var(--neon-cyan) 85%, white) 50%,
+    var(--text) 65%,
+    var(--text) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: titleSheen 6s ease-in-out infinite;
+}
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .section-title { -webkit-text-fill-color: transparent; }
+}
+@keyframes titleSheen {
+  0%, 100% { background-position: 130% 0; }
+  50%      { background-position: -30% 0; }
+}
+
+/* ============================================================
+   16) تفاعلات دقيقة — الصور، السعر، المفضلة
+   ============================================================ */
+.product-card img, .cat-img {
+  transition: transform .45s cubic-bezier(.2, .8, .3, 1), filter .3s ease;
+}
+.product-card:hover img, .cat-card:hover .cat-img {
+  transform: scale(1.09);
+  filter: saturate(1.15) brightness(1.06);
+}
+
+/* السعر: يكبر قليلاً ويتوهّج */
+.p-price {
+  transition: transform .25s ease, text-shadow .25s ease;
+}
+.product-card:hover .p-price {
+  transform: scale(1.08);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* زر المفضلة: نبضة عند التفعيل */
+.fav-btn {
+  transition: transform .2s cubic-bezier(.34, 1.56, .64, 1),
+              color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.fav-btn:hover { transform: scale(1.15); }
+.fav-btn.on {
+  animation: favPop .45s cubic-bezier(.34, 1.56, .64, 1);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--no) 55%, transparent);
+}
+@keyframes favPop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
+/* حقل البحث: توهّج عند التركيز */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--neon-cyan) 60%, var(--border)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--neon-cyan) 15%, transparent),
+              0 0 18px color-mix(in srgb, var(--neon-cyan) 20%, transparent);
+}
+
+/* ============================================================
+   17) الميلان ثلاثي الأبعاد + الأزرار المغناطيسية
+   (يفعّلها الجافاسكربت على أجهزة الماوس فقط)
+   ============================================================ */
+.cy-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.cy-magnet {
+  will-change: transform;
+}
+
+/* أثر المؤشر */
+.cy-trail {
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  z-index: 9997;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--neon-purple) 70%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--neon-cyan) 60%, transparent);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* على الموبايل: لا شيء من هذا يعمل إطلاقاً (حماية السرعة) */
+@media (max-width: 820px) {
+  .cyber-aurora::after { animation-duration: 40s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-title { animation: none; }
+  .cyber-aurora::after { animation: none; }
+}
