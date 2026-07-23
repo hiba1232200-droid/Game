@@ -8,7 +8,7 @@
   </div>
 </footer>
 <script src="/app.js?v=13" defer></script>
-<script src="/cyber-fx.js?v=4" defer></script>
+<script src="/cyber-fx.js?v=5" defer></script>
 </body>
 </html>
 <?php /* تتبّع الطلبات تلقائياً بالخلفية لو المستخدم مسجّل دخول */ ?>

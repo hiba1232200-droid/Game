@@ -635,3 +635,79 @@ input:focus, select:focus, textarea:focus {
   .section-title { animation: none; }
   .cyber-aurora::after { animation: none; }
 }
+
+/* ============================================================
+   18) توهّج النصوص والأرقام المهمة
+   (العناوين، الأسعار، الأرصدة، الشارات، الأزرار)
+   ملاحظة: فقرات الشرح تبقى بلا توهّج عمداً — للحفاظ على
+   وضوح القراءة على الموبايل وعلى سرعة الرسم.
+   ============================================================ */
+
+h1, h2, h3,
+.cat-name,
+.balance-pill,
+.bal-amount,
+.big-balance,
+.badge,
+.oos-badge,
+.btn,
+.cart-total,
+.ci-subval,
+b, strong {
+  text-shadow: 0 0 14px color-mix(in srgb, currentColor 45%, transparent);
+}
+
+/* الأسعار والأرصدة — توهّج ذهبي أقوى (لون الثيم) */
+.p-price,
+.big-balance,
+.bal-amount {
+  text-shadow:
+    0 0 10px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 0 26px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* حبّة الرصيد في الشريط العلوي — إطار متوهّج */
+.balance-pill {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border)) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* الشارات — توهّج بلونها */
+.badge, .oos-badge {
+  box-shadow: 0 0 14px color-mix(in srgb, currentColor 30%, transparent);
+}
+
+/* الأرقام داخل البطاقات */
+.cat-count { text-shadow: 0 0 10px color-mix(in srgb, var(--neon-cyan) 35%, transparent); }
+
+/* ============================================================
+   19) وضع الأداء المخفّف (cy-lite)
+   يُفعّله الجافاسكربت تلقائياً على الأجهزة الضعيفة أو عند
+   تفعيل "توفير البيانات" — يلغي أثقل التأثيرات ويبقي الشكل.
+   ============================================================ */
+html.cy-lite .cyber-aurora { animation: none; }
+html.cy-lite .cyber-aurora::after { animation: none; display: none; }
+html.cy-lite .card,
+html.cy-lite .topbar {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html.cy-lite .cat-card::before,
+html.cy-lite .product-card::before,
+html.cy-lite .btn::after { display: none; }
+html.cy-lite .section-title { animation: none; }
+html.cy-lite * { text-shadow: none !important; }
+html.cy-lite #cyberLoader { animation-delay: .2s; }
+
+/* ============================================================
+   20) إصلاح أيقونة الأقسام
+   style.css يستخدم /brand-logo.png وهو غير موجود في المشروع،
+   فتظهر بطاقات الأقسام فارغة. نضع logo.svg كطبقة سفلية:
+   إن وُجد brand-logo.png ظهر فوقها، وإلا ظهر الشعار البديل.
+   ============================================================ */
+.cat-icon {
+  background:
+    url('/brand-logo.png') center / 86% no-repeat,
+    url('/logo.svg') center / 72% no-repeat,
+    linear-gradient(160deg, #15193a 0%, #0a0d1e 100%) !important;
+}

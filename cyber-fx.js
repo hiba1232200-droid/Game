@@ -6,6 +6,29 @@
 (function () {
   "use strict";
 
+  /* ---------- 0) وضع الأداء المخفّف ----------
+     يُفعّل تلقائياً على الأجهزة الضعيفة أو عند تفعيل "توفير البيانات".
+     يجب أن يعمل مبكراً جداً قبل الرسم، لذلك هو أول شيء في الملف. */
+  (function detectLite() {
+    try {
+      var lite = false;
+      var nav = navigator;
+
+      // عدد أنوية المعالج (4 أو أقل = جهاز متواضع)
+      if (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency <= 4) lite = true;
+      // ذاكرة الجهاز بالجيجابايت
+      if (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 4) lite = true;
+      // المستخدم مفعّل "توفير البيانات" أو الشبكة بطيئة
+      if (nav.connection) {
+        if (nav.connection.saveData === true) lite = true;
+        var et = nav.connection.effectiveType || "";
+        if (et === "slow-2g" || et === "2g" || et === "3g") lite = true;
+      }
+
+      if (lite) document.documentElement.classList.add("cy-lite");
+    } catch (e) { /* لا شيء — الموقع يعمل عادي */ }
+  })();
+
   /* ---------- 1) إخفاء شاشة التحميل ----------
      ملاحظة: الشاشة تختفي وحدها بالـ CSS حتى لو لم يعمل هذا السكربت،
      وهنا نخفيها أبكر عند اكتمال تحميل الصفحة. */
