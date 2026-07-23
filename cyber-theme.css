@@ -25,18 +25,18 @@ body {
 }
 
 /* ============================================================
-   1) خلفية أورورا متحركة — طبقة ثابتة خلف كل شيء
-   تعتمد على تحريك gradients فقط (GPU-friendly، خفيفة جداً)
-   ============================================================ */
-/* ============================================================
    1) خلفية أورورا متحركة — عنصر فعلي ثابت خلف المحتوى
    (عنصر div مضمون الظهور، لا يتأثر بخلفيات العناصر الأخرى)
    ============================================================ */
 .cyber-aurora {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   background:
     radial-gradient(40% 40% at 12% 18%, rgba(124, 92, 255, 0.55), transparent 70%),
     radial-gradient(38% 38% at 88% 12%, rgba(34, 224, 255, 0.42), transparent 70%),
@@ -45,26 +45,9 @@ body {
   background-repeat: no-repeat;
   animation: auroraDrift 16s ease-in-out infinite alternate;
 }
-/* المحتوى كله يبقى فوق الأورورا */
-body > *:not(.cyber-aurora) {
-  position: relative;
-  z-index: 1;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background:
-    radial-gradient(closest-side at 12% 18%, rgba(124, 92, 255, 0.55), transparent 55%),
-    radial-gradient(closest-side at 88% 12%, rgba(34, 224, 255, 0.45), transparent 55%),
-    radial-gradient(closest-side at 78% 82%, rgba(59, 130, 255, 0.45), transparent 55%),
-    radial-gradient(closest-side at 20% 92%, rgba(255, 60, 172, 0.35), transparent 55%);
-  background-repeat: no-repeat;
-  animation: auroraDrift 16s ease-in-out infinite alternate;
-  pointer-events: none;
-}
+/* ملاحظة: لا نلمس position لأي عنصر في الصفحة —
+   الشريط الجانبي والعلوي معتمدان على fixed/sticky، وأي تغيير يكسر التخطيط.
+   الأورورا بـ z-index سالب فتظهر خلف المحتوى تلقائياً. */
 
 /* شبكة رقمية خفيفة جداً فوق الأورورا */
 body::after {
@@ -89,7 +72,7 @@ body::after {
 
 /* احترام تفضيل تقليل الحركة (أداء + وصولية) */
 @media (prefers-reduced-motion: reduce) {
-  body::before { animation: none; }
+  .cyber-aurora { animation: none; }
 }
 
 /* على الشاشات الصغيرة نخفّف أكثر للحفاظ على الأداء */
