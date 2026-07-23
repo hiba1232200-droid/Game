@@ -711,3 +711,108 @@ html.cy-lite #cyberLoader { animation-delay: .2s; }
     url('/logo.svg') center / 72% no-repeat,
     linear-gradient(160deg, #15193a 0%, #0a0d1e 100%) !important;
 }
+
+/* ============================================================
+   21) لوحة الأدمن — بطاقات إحصاء متوهّجة وجداول مقروءة
+   ============================================================ */
+
+/* بطاقات الإحصاء: شريط نيون علوي + توهّج للرقم */
+.stat {
+  position: relative;
+  overflow: hidden;
+}
+.stat::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--neon-purple), var(--neon-cyan), var(--accent));
+  opacity: .9;
+}
+.stat .n {
+  text-shadow:
+    0 0 14px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 34px color-mix(in srgb, var(--accent) 25%, transparent);
+  transition: transform .25s ease;
+}
+.stat:hover .n { transform: scale(1.06); }
+
+/* البطاقة المميّزة (highlight) */
+.stat.highlight {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* الجداول: صف بالتناوب + إبراز عند المرور + رأس ثابت */
+.tbl th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--bg2) 96%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--neon-purple) 35%, var(--border));
+  text-shadow: 0 0 10px color-mix(in srgb, var(--neon-cyan) 30%, transparent);
+}
+.tbl tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--bg2) 35%, transparent);
+}
+.tbl tbody tr {
+  transition: background .18s ease;
+}
+.tbl tbody tr:hover {
+  background: color-mix(in srgb, var(--neon-purple) 12%, transparent);
+}
+
+/* الجداول على الموبايل: تمرير أفقي مريح بدل الانضغاط */
+.tbl {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+@media (min-width: 821px) {
+  .tbl { display: table; white-space: normal; }
+}
+
+/* الأزرار الصغيرة */
+.btn-mini {
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.btn-mini:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
+}
+.btn-mini.danger:hover {
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--no) 40%, transparent);
+}
+
+/* الرسم البياني الأسبوعي: أعمدة متدرّجة متوهّجة */
+.chart7-bar {
+  background: linear-gradient(180deg,
+    var(--neon-cyan), var(--neon-purple)) !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--neon-purple) 45%, transparent);
+  border-radius: 6px 6px 0 0;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.chart7-col:hover .chart7-bar {
+  transform: scaleY(1.04);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--neon-cyan) 60%, transparent);
+}
+.chart7-val {
+  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* النماذج السريعة داخل الجداول */
+.inline-form input,
+.inline-form select {
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+/* في وضع الأداء المخفّف: إلغاء التوهّجات هنا أيضاً */
+html.cy-lite .stat .n,
+html.cy-lite .tbl th,
+html.cy-lite .chart7-val { text-shadow: none; }
+html.cy-lite .chart7-bar,
+html.cy-lite .stat.highlight { box-shadow: none; }
