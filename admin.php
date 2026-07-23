@@ -67,6 +67,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = '✅ تم تغيير كلمة المرور بنجاح — استخدمها في الدخول القادم';
         }
     }
+    // ===== إنشاء حساب أدمن إضافي =====
+    if (isset($_POST['add_admin'])) {
+        $aEmail = strtolower(trim($_POST['adm_email'] ?? ''));
+        $aName  = trim($_POST['adm_name'] ?? '');
+        $aPass  = $_POST['adm_pass'] ?? '';
+        $myPass = $_POST['adm_my_pass'] ?? '';
+
+        // تحقق من كلمة مرورك أنت قبل إنشاء أدمن جديد (حماية إضافية)
+        $st = db()->prepare("SELECT password FROM users WHERE id=?");
+        $st->execute([$U['id']]);
+        $myHash = $st->fetchColumn();
+
+        if (!$myHash || !password_verify($myPass, $myHash)) {
+            $msg = '❌ كلمة مرورك الحالية غير صحيحة';
+        } elseif (!filter_var($aEmail, FILTER_VALIDATE_EMAIL)) {
+            $msg = '❌ البريد غير صالح';
+        } elseif (strlen($aPass) < 8) {
+            $msg = '❌ كلمة مرور الأدمن الجديد يجب أن تكون 8 أحرف على الأقل';
+        } else {
+            $ck = db()->prepare("SELECT id, role FROM users WHERE email=?");
+            $ck->execute([$aEmail]);
+            $exists = $ck->fetch(PDO::FETCH_ASSOC);
+
+            if ($exists) {
+                // الحساب موجود — نرقّيه إلى أدمن ونحدّث كلمة مروره
+                db()->prepare("UPDATE users SET role='admin', password=? WHERE id=?")
+                    ->execute([password_hash($aPass, PASSWORD_DEFAULT), $exists['id']]);
+                $msg = '✅ تمت ترقية الحساب الموجود (' . e($aEmail) . ') إلى أدمن وتحديث كلمة مروره';
+            } else {
+                db()->prepare("INSERT INTO users (name,email,password,role) VALUES (?,?,?,'admin')")
+                    ->execute([
+                        $aName !== '' ? $aName : 'أدمن',
+                        $aEmail,
+                        password_hash($aPass, PASSWORD_DEFAULT),
+                    ]);
+                $msg = '✅ تم إنشاء حساب أدمن جديد: ' . e($aEmail);
+            }
+            notify_admin("👤 <b>تم إنشاء/ترقية حساب أدمن</b>\nالبريد: " . e($aEmail));
+        }
+    }
     if (isset($_POST['tg_test'])) {
         if (tg_enabled()) {
             $ok = notify_admin("✅ <b>اختبار ناجح</b>\nإشعارات " . STORE_NAME . " تعمل بشكل صحيح.");
@@ -1146,6 +1186,22 @@ include __DIR__ . '/header.php'; ?>
       <input type="text" readonly onclick="this.select()" value="<?= e(site_url()) ?>/?bypass=<?= e(maintenance_bypass_key()) ?>" style="width:100%;font-size:13px">
       <p class="muted small" style="margin:6px 0 0">للخروج من وضع التصفّح: افتح <b><?= e(site_url()) ?>/?bypass=off</b></p>
     </div>
+  </div>
+  <div class="card">
+    <h3>👤 إضافة حساب أدمن آخر</h3>
+    <p class="muted">أنشئ حساب أدمن إضافي (لشريك، أو كحساب احتياطي في حال فقدت الأول). إذا كان البريد موجوداً كمستخدم عادي فسيُرقّى إلى أدمن.</p>
+    <form method="post">
+      <label class="muted small">البريد الإلكتروني للأدمن الجديد</label>
+      <input name="adm_email" type="email" required placeholder="admin2@luxecard.store" style="width:100%;margin-bottom:8px">
+      <label class="muted small">الاسم (اختياري)</label>
+      <input name="adm_name" type="text" placeholder="أدمن" style="width:100%;margin-bottom:8px">
+      <label class="muted small">كلمة مرور الأدمن الجديد (8 أحرف على الأقل)</label>
+      <input name="adm_pass" type="password" required autocomplete="new-password" style="width:100%;margin-bottom:8px">
+      <label class="muted small">كلمة مرورك أنت (للتأكيد)</label>
+      <input name="adm_my_pass" type="password" required autocomplete="current-password" style="width:100%;margin-bottom:10px">
+      <button class="btn" name="add_admin" value="1">إنشاء حساب الأدمن</button>
+    </form>
+    <p class="muted small" style="margin-top:8px">⚠️ الأدمن الجديد يملك صلاحيات كاملة (الأرصدة، الأسعار، الطلبات). لا تعطه إلا لشخص تثق به تماماً.</p>
   </div>
   <div class="card">
     <h3>🔒 تغيير كلمة مرور الأدمن</h3>
