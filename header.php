@@ -15,6 +15,7 @@ if (maintenance_on() && !$__isAdmin && !$__hasBypass && !$__isAuthPage) {
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="google-site-verification" content="Ey-cqSS8Ozxjttta7_D4cc-Rvg9qBCx0lkGs0ijcNaM" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e(STORE_NAME) ?> | صيانة</title>
 <link rel="stylesheet" href="/style.css?v=20">
@@ -42,6 +43,7 @@ if (maintenance_on() && !$__isAdmin && !$__hasBypass && !$__isAuthPage) {
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="google-site-verification" content="Ey-cqSS8Ozxjttta7_D4cc-Rvg9qBCx0lkGs0ijcNaM" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
 /* وضع الأداء المخفّف — يعمل قبل الرسم على الأجهزة الضعيفة/الشبكات البطيئة */
