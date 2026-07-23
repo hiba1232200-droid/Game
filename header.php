@@ -45,10 +45,44 @@ if (maintenance_on() && !$__isAdmin && !$__hasBypass && !$__isAuthPage) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e(STORE_NAME) ?> | <?= e($pageTitle ?? 'الرئيسية') ?></title>
 <meta name="description" content="<?= e(STORE_NAME . ' - ' . STORE_TAGLINE) ?>">
+<?php
+// ===== SEO: Open Graph + Twitter + Schema =====
+$__ogTitle = STORE_NAME . ' | ' . ($pageTitle ?? 'الرئيسية');
+$__ogDesc  = STORE_NAME . ' - ' . STORE_TAGLINE;
+$__site    = rtrim(site_url(), '/');
+$__ogUrl   = $__site . ($_SERVER['REQUEST_URI'] ?? '/');
+$__ogImg   = $__site . '/brand-logo.png';
+?>
+<meta name="theme-color" content="#0b0e1a">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="<?= e($__ogUrl) ?>">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="<?= e(STORE_NAME) ?>">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:title" content="<?= e($__ogTitle) ?>">
+<meta property="og:description" content="<?= e($__ogDesc) ?>">
+<meta property="og:url" content="<?= e($__ogUrl) ?>">
+<meta property="og:image" content="<?= e($__ogImg) ?>">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<?= e($__ogTitle) ?>">
+<meta name="twitter:description" content="<?= e($__ogDesc) ?>">
+<meta name="twitter:image" content="<?= e($__ogImg) ?>">
+<script type="application/ld+json">
+<?= json_encode([
+  '@context' => 'https://schema.org',
+  '@type'    => 'OnlineStore',
+  'name'     => STORE_NAME,
+  'url'      => $__site,
+  'logo'     => $__ogImg,
+  'description' => $__ogDesc,
+  'areaServed'  => 'SY',
+  'currenciesAccepted' => 'SYP, USDT',
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=20">
-<link rel="stylesheet" href="/cyber-theme.css?v=7">
+<link rel="stylesheet" href="/cyber-theme.css?v=8">
 <!-- الخط يحمّل بدون حجب الصفحة (أسرع ظهور) -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>

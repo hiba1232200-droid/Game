@@ -322,3 +322,36 @@ body::after {
   background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple)) !important;
   box-shadow: 0 0 12px color-mix(in srgb, var(--neon-cyan) 70%, transparent);
 }
+
+/* ============================================================
+   9) تمرير ناعم (سطر واحد، بدون أي مكتبة)
+   ============================================================ */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   10) مؤشر متوهّج — للأجهزة ذات الماوس فقط
+   لا يُنشأ إطلاقاً على الموبايل واللمس (صفر تكلفة أداء هناك)
+   ============================================================ */
+#cyCursor {
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  z-index: 9998;
+  pointer-events: none;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--neon-cyan) 55%, transparent) 0%,
+    transparent 70%);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--neon-purple) 60%, transparent);
+  opacity: 0;
+  transition: opacity .25s ease, transform .12s ease;
+  will-change: transform;
+}
+#cyCursor.on { opacity: 1; }
+#cyCursor.tap { transform: scale(1.9); }

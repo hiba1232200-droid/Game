@@ -70,9 +70,48 @@
     }, 6000);
   }
 
+  /* ---------- 3) مؤشر متوهّج (للأجهزة ذات الماوس فقط) ----------
+     لا يُنشأ إطلاقاً على الموبايل/اللمس، فتكلفته هناك = صفر. */
+  function initCursor() {
+    try {
+      if (!window.matchMedia) return;
+      if (!window.matchMedia("(pointer: fine)").matches) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    } catch (e) { return; }
+
+    var dot = document.createElement("div");
+    dot.id = "cyCursor";
+    document.body.appendChild(dot);
+
+    var x = 0, y = 0, drawn = false, ticking = false;
+
+    function draw() {
+      ticking = false;
+      dot.style.transform = "translate3d(" + x + "px," + y + "px,0)";
+      if (!drawn) { dot.classList.add("on"); drawn = true; }
+    }
+
+    window.addEventListener("mousemove", function (e) {
+      x = e.clientX; y = e.clientY;
+      if (!ticking) { ticking = true; requestAnimationFrame(draw); }
+    }, { passive: true });
+
+    window.addEventListener("mousedown", function () {
+      dot.classList.add("tap");
+    }, { passive: true });
+    window.addEventListener("mouseup", function () {
+      dot.classList.remove("tap");
+    }, { passive: true });
+    document.addEventListener("mouseleave", function () {
+      dot.classList.remove("on"); drawn = false;
+    });
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initReveal);
+    document.addEventListener("DOMContentLoaded", initCursor);
   } else {
     initReveal();
+    initCursor();
   }
 })();
