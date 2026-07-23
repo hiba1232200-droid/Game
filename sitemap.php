@@ -6,6 +6,10 @@
  */
 require_once __DIR__ . '/db.php';
 
+// نتجاهل أي مخرجات سابقة (مسافة أو سطر فارغ من ملف مُضمَّن)
+// لأن أي حرف قبل <?xml يجعل جوجل يرفض الملف.
+if (ob_get_level()) { @ob_end_clean(); }
+
 header('Content-Type: application/xml; charset=UTF-8');
 header('Cache-Control: public, max-age=10800'); // 3 ساعات
 
@@ -35,12 +39,20 @@ sm_url($site . '/index.php?page=terms',    $today, 'yearly',  '0.4');
 sm_url($site . '/index.php?page=search',   $today, 'weekly',  '0.5');
 
 // ===== الأقسام (تُقرأ من فاست كارد) =====
+// حماية من البطء: جوجل يستسلم إذا تأخّر الرد، لذلك نضع حداً زمنياً
+// ونتوقّف عن إضافة الأقسام إن طال الوقت — الخريطة تبقى صالحة دائماً.
+$__start = microtime(true);
+$__budget = 8.0; // ثوانٍ كحد أقصى لجلب الأقسام
+
 try {
+    @set_time_limit(25);
     require_once __DIR__ . '/fastcard_api.php';
     $root = fc_content(0);
     $cats = $root['categories'] ?? [];
 
     foreach ($cats as $c) {
+        if (microtime(true) - $__start > $__budget) break;
+
         $id   = (string)($c['id'] ?? '');
         $name = (string)($c['name'] ?? '');
         if ($id === '') continue;
@@ -48,7 +60,8 @@ try {
         sm_url($site . '/index.php?page=products&cat=' . urlencode($id)
              . '&name=' . urlencode($name), $today, 'daily', '0.9');
 
-        // الأقسام الفرعية (مستوى واحد — يكفي لتغطية الألعاب)
+        // الأقسام الفرعية (مستوى واحد)
+        if (microtime(true) - $__start > $__budget) continue;
         try {
             $sub = fc_content($id);
             foreach (($sub['categories'] ?? []) as $s) {
@@ -60,7 +73,7 @@ try {
             }
         } catch (Exception $e) { /* تجاهل قسماً واحداً فقط */ }
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     // لا شيء — الخريطة تبقى صالحة بالصفحات الثابتة
 }
 
