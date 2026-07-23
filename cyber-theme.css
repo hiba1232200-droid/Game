@@ -393,3 +393,43 @@ html { scroll-behavior: smooth; }
     animation-duration: 26s; /* حركة أبطأ = رسم أقل */
   }
 }
+
+/* ============================================================
+   12) زر المشاركة + رسالة التأكيد
+   ============================================================ */
+#shareSiteBtn {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--neon-purple) 22%, transparent),
+    color-mix(in srgb, var(--neon-cyan) 18%, transparent));
+  border: 1px solid color-mix(in srgb, var(--neon-purple) 35%, var(--border));
+  margin-top: 6px;
+}
+#shareSiteBtn:hover {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--neon-purple) 38%, transparent),
+    color-mix(in srgb, var(--neon-cyan) 30%, transparent));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--neon-purple) 40%, transparent);
+}
+
+.cy-toast {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: 24px;
+  margin: 0 auto;
+  max-width: 340px;
+  z-index: 10000;
+  padding: 13px 16px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 700;
+  color: #fff;
+  background: color-mix(in srgb, var(--bg2) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--neon-cyan) 40%, var(--border));
+  box-shadow: 0 10px 34px rgba(0, 0, 0, .45),
+              0 0 20px color-mix(in srgb, var(--neon-cyan) 22%, transparent);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .3s ease, transform .3s ease;
+  word-break: break-all;
+}
+.cy-toast.on { opacity: 1; transform: none; }

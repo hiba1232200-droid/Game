@@ -107,11 +107,72 @@
     });
   }
 
+  /* ---------- 4) زر مشاركة رابط الموقع ----------
+     يستخدم قائمة المشاركة الأصلية بالهاتف، وإن لم تتوفر ينسخ الرابط. */
+  function initShare() {
+    var btn = document.getElementById("shareSiteBtn");
+    if (!btn) return;
+
+    function toast(msg) {
+      var t = document.createElement("div");
+      t.className = "cy-toast";
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(function () { t.classList.add("on"); }, 10);
+      setTimeout(function () {
+        t.classList.remove("on");
+        setTimeout(function () {
+          if (t.parentNode) t.parentNode.removeChild(t);
+        }, 350);
+      }, 2200);
+    }
+
+    function fallbackCopy(url) {
+      // نسخ يدوي يعمل على المتصفحات القديمة أيضاً
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = url;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast(ok ? "✅ تم نسخ رابط الموقع" : url);
+      } catch (e) {
+        toast(url);
+      }
+    }
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      var url = btn.getAttribute("data-share-url") || window.location.origin;
+      var title = btn.getAttribute("data-share-title") || document.title;
+      var text = btn.getAttribute("data-share-text") || "";
+
+      if (navigator.share) {
+        navigator.share({ title: title, text: text, url: url })
+          .catch(function () { /* المستخدم ألغى المشاركة — لا شيء */ });
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url)
+          .then(function () { toast("✅ تم نسخ رابط الموقع"); })
+          .catch(function () { fallbackCopy(url); });
+        return;
+      }
+      fallbackCopy(url);
+    });
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initReveal);
     document.addEventListener("DOMContentLoaded", initCursor);
+    document.addEventListener("DOMContentLoaded", initShare);
   } else {
     initReveal();
     initCursor();
+    initShare();
   }
 })();

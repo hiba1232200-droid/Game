@@ -82,7 +82,7 @@ $__ogImg   = $__site . '/brand-logo.png';
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=20">
-<link rel="stylesheet" href="/cyber-theme.css?v=9">
+<link rel="stylesheet" href="/cyber-theme.css?v=10">
 <!-- الخط يحمّل بدون حجب الصفحة (أسرع ظهور) -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>
@@ -172,6 +172,9 @@ $__showWaPopup = (wa_popup_on() && wa_popup_link());
     <a href="/contact.php">📞 تواصل معنا</a>
     <a href="/faq.php">❓ الأسئلة الشائعة</a>
     <a href="/index.php?page=terms">📄 سياسة الاسترجاع</a>
+    <a href="#" id="shareSiteBtn" data-share-url="<?= e(rtrim(site_url(), '/')) ?>"
+       data-share-title="<?= e(STORE_NAME) ?>"
+       data-share-text="<?= e(STORE_NAME . ' — ' . STORE_TAGLINE) ?>">📤 شارك الموقع</a>
   </nav>
   <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️ تبديل الوضع</button>
   <button class="theme-toggle" onclick="toggleCurrency()">💱 العملة: <?= display_currency() === 'usd' ? 'دولار $' : 'ليرة ل.س' ?></button>
