@@ -73,12 +73,30 @@ date_default_timezone_set('Asia/Damascus');
 define('SESSION_LIFETIME', 30 * 24 * 60 * 60);
 ini_set('session.gc_maxlifetime', (string)SESSION_LIFETIME);
 ini_set('session.cookie_lifetime', (string)SESSION_LIFETIME);
+// هل الاتصال مشفّر؟ (Railway وغيره يمرّرون الترويسة عبر بروكسي)
+$__isHttps = (
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+    (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ||
+    (($_SERVER['SERVER_PORT'] ?? '') == 443)
+);
 session_set_cookie_params([
     'lifetime' => SESSION_LIFETIME,
     'path'     => '/',
+    'secure'   => $__isHttps,  // الكوكي لا يُرسل أبداً عبر اتصال غير مشفّر
     'httponly' => true,
     'samesite' => 'Lax',
 ]);
+
+// ===== ترويسات حماية (لا تغيّر أي وظيفة) =====
+if (!headers_sent() && PHP_SAPI !== 'cli') {
+    header('X-Content-Type-Options: nosniff');          // منع تخمين نوع الملف
+    header('X-Frame-Options: SAMEORIGIN');              // منع تضمين الموقع في إطار (clickjacking)
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+    if ($__isHttps) {
+        header('Strict-Transport-Security: max-age=31536000');
+    }
+}
 
 // رابط التحقق من اسم اللاعب (نفس اللي بيستخدمه موقع FastCard)
 define('CHECK_PLAYER_URL', 'https://fastcard1.store/redeemtech_check_player.php');
@@ -122,14 +140,18 @@ function admin_chat_id()   { return env_or('ADMIN_CHAT_ID', ADMIN_CHAT_ID); }
 
 // إرسال إشعار للأدمن (لا يعطّل العملية إذا فشل)
 // الأولوية لإعدادات لوحة الأدمن (tg_token / tg_chat_id)، ثم متغيرات البيئة/الكود كخيار احتياطي
-function notify_admin($text) {
-    $token = ''; $chat = '';
+function notify_admin($text, &$errOut = null) {
+    $token = ''; $chat = ''; $src = 'لوحة الأدمن';
     if (function_exists('setting')) {
         $token = trim((string)setting('tg_token', ''));
         $chat  = trim((string)setting('tg_chat_id', ''));
     }
-    if ($token === '' || $chat === '') { $token = admin_bot_token(); $chat = admin_chat_id(); }
-    if ($token === '' || $chat === '') return false;
+    if ($token === '' || $chat === '') {
+        $token = admin_bot_token(); $chat = admin_chat_id(); $src = 'متغيرات البيئة';
+    }
+    if ($token === '') { $errOut = 'التوكن فارغ (لا في اللوحة ولا في متغيرات البيئة)'; return false; }
+    if ($chat === '')  { $errOut = 'معرّف المحادثة (chat_id) فارغ'; return false; }
+
     $url = "https://api.telegram.org/bot$token/sendMessage";
     $ok = false;
     try {
@@ -146,10 +168,34 @@ function notify_admin($text) {
                 'disable_web_page_preview' => true,
             ]),
         ]);
-        $res = @curl_exec($ch);
-        $ok = ($res !== false && curl_getinfo($ch, CURLINFO_HTTP_CODE) == 200);
+        $res  = @curl_exec($ch);
+        $cerr = curl_error($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         @curl_close($ch);
-    } catch (Exception $e) { $ok = false; }
+
+        if ($res === false || $cerr) {
+            $errOut = 'تعذّر الاتصال بتلجرام: ' . $cerr;
+            return false;
+        }
+        $d = json_decode((string)$res, true);
+        $ok = ($code === 200 && !empty($d['ok']));
+        if (!$ok) {
+            // نترجم أشهر أخطاء تلجرام لرسالة مفهومة
+            $desc = (string)($d['description'] ?? "HTTP $code");
+            $hint = '';
+            $low  = strtolower($desc);
+            if (strpos($low, 'unauthorized') !== false) {
+                $hint = ' → التوكن غير صحيح أو أُبطِل (هل غيّرت توكن البوت من BotFather؟)';
+            } elseif (strpos($low, 'chat not found') !== false) {
+                $hint = ' → معرّف المحادثة غير صحيح، أو لم تضغط Start مع هذا البوت';
+            } elseif (strpos($low, 'blocked') !== false) {
+                $hint = ' → أنت حاظر البوت — ألغِ الحظر واضغط Start';
+            } elseif (strpos($low, "can't parse entities") !== false) {
+                $hint = ' → مشكلة في تنسيق النص (وسوم HTML)';
+            }
+            $errOut = "تلجرام رفض الطلب [المصدر: $src]: $desc$hint";
+        }
+    } catch (Exception $e) { $errOut = 'خطأ: ' . $e->getMessage(); $ok = false; }
     return $ok;
 }
 
