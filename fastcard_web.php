@@ -76,6 +76,17 @@ function fcw_csrf() {
 }
 
 /** تسجيل الدخول لموقع FastCard */
+/** يتأكد فعلياً أننا مسجّلون دخول (لا يكفي أن الطلب لم يفشل) */
+function fcw_is_logged_in() {
+    [$body, $info] = fcw_curl(fcw_base() . '/index');
+    $url  = strtolower((string)($info['url'] ?? ''));
+    $html = (string)$body;
+    // إن رجعنا لصفحة الدخول أو ظهر حقل كلمة المرور → لسنا مسجّلين
+    if (strpos($url, 'login') !== false) return false;
+    if (preg_match('/name=["\']?password["\']?/i', $html)) return false;
+    return true;
+}
+
 function fcw_login() {
     $base = fcw_base();
     fcw_curl($base . '/login'); // جلب PHPSESSID
@@ -100,11 +111,17 @@ function fcw_login() {
                 CURLOPT_POSTFIELDS => http_build_query($payload),
                 CURLOPT_HTTPHEADER => ['X-Requested-With: XMLHttpRequest', 'Referer: ' . $base . '/twofactor'],
             ]);
-            if (strpos(strtolower($i2['url'] ?? ''), 'twofactor') === false) return true;
+            if (strpos(strtolower($i2['url'] ?? ''), 'twofactor') === false) {
+                // تأكيد فعلي بدل الافتراض
+                return fcw_is_logged_in();
+            }
         }
         return false;
     }
-    return true;
+
+    // لا مصادقة ثنائية — نتأكد فعلياً أن الدخول نجح
+    // (سابقاً كانت ترجع true دائماً، فيظهر "login=true" رغم فشل الدخول)
+    return fcw_is_logged_in();
 }
 
 /**

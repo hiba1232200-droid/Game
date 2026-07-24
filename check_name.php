@@ -48,7 +48,8 @@ if (file_exists(__DIR__ . '/fastcard_web.php')) {
         echo "=== تشخيص التحقق المباشر من فاست كارد ===\n";
         echo "player  = $player\n";
         echo "product = " . ($product ?: '7816 (افتراضي — قد يكون سبب الفشل!)') . "\n";
-        echo "مفعّل؟  = " . (function_exists('fcw_enabled') && fcw_enabled() ? 'نعم' : 'لا — بيانات الدخول ناقصة') . "\n\n";
+        echo "مفعّل؟  = " . (function_exists('fcw_enabled') && fcw_enabled() ? 'نعم' : 'لا — بيانات الدخول ناقصة') . "\n";
+        echo "مسجّل دخول فعلياً؟ = " . (function_exists('fcw_is_logged_in') && fcw_is_logged_in() ? '✅ نعم' : '❌ لا — هذا سبب الرفض (403)') . "\n\n";
         echo "--- الخطوات ---\n";
         foreach ((array)$fcwDebug as $line) echo "• $line\n";
         echo "\n--- النتيجة ---\n" . json_encode($res, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n";
