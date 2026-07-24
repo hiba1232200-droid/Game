@@ -41,7 +41,19 @@ if ($botUrl !== '') {
 // احتياطي: الطريقة المباشرة من الموقع (لو البوت مش متاح)
 if (file_exists(__DIR__ . '/fastcard_web.php')) {
     require_once __DIR__ . '/fastcard_web.php';
-    $res = fcw_check_player($player, $product ?: 7816);
+    $fcwDebug = $dbg ? [] : null;
+    $res = fcw_check_player($player, $product ?: 7816, $fcwDebug);
+    if ($dbg) {
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "=== تشخيص التحقق المباشر من فاست كارد ===\n";
+        echo "player  = $player\n";
+        echo "product = " . ($product ?: '7816 (افتراضي — قد يكون سبب الفشل!)') . "\n";
+        echo "مفعّل؟  = " . (function_exists('fcw_enabled') && fcw_enabled() ? 'نعم' : 'لا — بيانات الدخول ناقصة') . "\n\n";
+        echo "--- الخطوات ---\n";
+        foreach ((array)$fcwDebug as $line) echo "• $line\n";
+        echo "\n--- النتيجة ---\n" . json_encode($res, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n";
+        exit;
+    }
     echo json_encode($res, JSON_UNESCAPED_UNICODE); exit;
 }
 
