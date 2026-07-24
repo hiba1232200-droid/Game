@@ -54,7 +54,7 @@ if(n.connection){if(n.connection.saveData===true)l=true;
 var e=n.connection.effectiveType||"";if(e==="slow-2g"||e==="2g"||e==="3g")l=true;}
 if(l)document.documentElement.className+=" cy-lite";}catch(x){}})();
 </script>
-<link rel="preload" as="image" href="/logo.svg" fetchpriority="high">
+<link rel="preload" as="image" href="/brand-mark.png" fetchpriority="high">
 <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 <title><?= e(STORE_NAME) ?> | <?= e($pageTitle ?? 'الرئيسية') ?></title>
 <meta name="description" content="<?= e(STORE_NAME . ' - ' . STORE_TAGLINE) ?>">
@@ -95,7 +95,7 @@ $__ogImg   = $__site . '/brand-logo.png';
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=20">
-<link rel="stylesheet" href="/cyber-theme.css?v=15">
+<link rel="stylesheet" href="/cyber-theme.css?v=16">
 <!-- الخط يحمّل بدون حجب الصفحة (أسرع ظهور) -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>
@@ -150,7 +150,7 @@ $__showWaPopup = (wa_popup_on() && wa_popup_link());
 
 <aside class="sidebar" id="sidebar">
   <div class="sb-head">
-    <div class="logo-txt"><img src="/logo.svg?v=1" class="logo-img" alt=""><span class="logo-name"><?= e(STORE_NAME) ?></span></div>
+    <div class="logo-txt"><img src="/brand-mark.png?v=1" class="logo-img" alt=""><span class="logo-name"><?= e(STORE_NAME) ?></span></div>
   </div>
   <?php if ($U): ?>
     <div class="sb-user">
@@ -205,7 +205,7 @@ $__showWaPopup = (wa_popup_on() && wa_popup_link());
                 || (strpos($_uri, '/index.php') === 0 && strpos($_uri, 'page=') === false && strpos($_uri, 'cat=') === false));
   ?>
   <?php if (!$_isHome): ?><button class="back-btn" onclick="goBack()" title="رجوع">‹</button><?php endif; ?>
-  <a class="logo-txt" href="/index.php"><img src="/logo.svg?v=1" class="logo-img" alt=""><span class="logo-name"><?= e(STORE_NAME) ?></span></a>
+  <a class="logo-txt" href="/index.php"><img src="/brand-mark.png?v=1" class="logo-img" alt=""><span class="logo-name"><?= e(STORE_NAME) ?></span></a>
   <div class="top-actions">
     <a class="icon-btn" href="/index.php?page=search" title="بحث">🔍</a>
     <?php if ($U): ?>
