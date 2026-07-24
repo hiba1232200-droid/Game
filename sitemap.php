@@ -13,6 +13,32 @@ if (ob_get_level()) { @ob_end_clean(); }
 header('Content-Type: application/xml; charset=UTF-8');
 header('Cache-Control: public, max-age=10800'); // 3 ساعات
 
+/* ---------------------------------------------------------------
+   نسخة محفوظة (cache):
+   توليد الخريطة يتطلب الاتصال بفاست كارد وقد يستغرق ثواني،
+   وزاحف جوجل يستسلم بسرعة فتفشل الخريطة. لذلك نحفظ آخر نسخة
+   في قاعدة البيانات ونقدّمها فوراً، ونعيد التوليد كل 6 ساعات فقط.
+   --------------------------------------------------------------- */
+$__CACHE_KEY = 'sitemap_xml';
+$__CACHE_AT  = 'sitemap_xml_at';
+$__TTL       = 21600; // 6 ساعات
+$__force     = isset($_GET['refresh']);
+
+if (!$__force) {
+    try {
+        $cached = (string)setting($__CACHE_KEY, '');
+        $when   = (int)setting($__CACHE_AT, 0);
+        if ($cached !== '' && (time() - $when) < $__TTL) {
+            header('X-Sitemap-Cache: hit');
+            echo $cached;
+            exit;
+        }
+    } catch (Exception $e) { /* نكمل ونولّد من جديد */ }
+}
+
+// نجمع الناتج لنحفظه بعد التوليد
+ob_start();
+
 $site = rtrim(site_url(), '/');
 $today = date('Y-m-d');
 
@@ -78,3 +104,11 @@ try {
 }
 
 echo '</urlset>';
+
+// حفظ النسخة لتقديمها فوراً في الطلبات القادمة (وخاصة لزاحف جوجل)
+$__xml = ob_get_clean();
+echo $__xml;
+try {
+    set_setting($__CACHE_KEY, $__xml);
+    set_setting($__CACHE_AT, (string)time());
+} catch (Exception $e) { /* لا شيء — الخريطة صحيحة على أي حال */ }
